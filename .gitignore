@@ -1,0 +1,17 @@
+*.o
+*.d
+*.bin
+*.elf
+*.hex
+*.lst
+*.map
+.vscode
+.metadata/
+.settings/
+Debug/
+Release/
+*.launch
+RemoteSystemsTempFiles/
+.vscode
+.clangd
+compile_commands.json
