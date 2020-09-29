@@ -1,5 +1,7 @@
 TARGET = uart-dma
-SRCS = uart-dma.c
+SRCS = main.c
+SRCS += usart_dma.c
+SRCS += calibration.c
 
 LINKER_SCRIPT = ../flash/STM32F407VGTX_FLASH.ld
 
