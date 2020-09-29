@@ -2,14 +2,14 @@
 // Author: Robert Gałat
 // Email: robgal519@gmail.com
 
+#include "calibration.h"
 #include "stdbool.h"
 #include "stddef.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "stm32f4xx.h"
 #include "system_stm32f4xx.h"
-#include "calibration.h"
-#include "usart_dma.h"
+#include "uart_int.h"
 
 #define COMMON_SPEEDS_SIZE sizeof(common_speeds) / sizeof(*common_speeds)
 #define REPS 5U
@@ -21,7 +21,7 @@ struct test_ctx {
   void (*transfer)(uint8_t *data, uint32_t size);
 };
 
-extern volatile bool usart1_transfer_complete;
+extern volatile bool uart1_transfer_complete;
 
 uint32_t common_speeds[] = {
     4800,   9600,   19200,   38400,   57600,   115200,   230400,
@@ -44,7 +44,7 @@ struct test_ctx calibration = {.configure = configure_timer,
                                .transfer = start_calibration};
 
 struct test_ctx testing_dma = {.configure = configure_usart1,
-                               .transfer = transfer_usart1_dma};
+                               .transfer = start_transfer_usart1};
 
 bool test_performance(struct test_ctx *ctx, uint32_t baud, uint32_t *counter) {
 
@@ -63,11 +63,11 @@ bool test_performance(struct test_ctx *ctx, uint32_t baud, uint32_t *counter) {
   if (ctx->transfer == NULL)
     return false;
 
-  usart1_transfer_complete = false;
+  uart1_transfer_complete = false;
 
   ctx->transfer(data, sizeof(data));
   GPIOA->ODR |= 1 << 4;
-  while (!usart1_transfer_complete) {
+  while (!uart1_transfer_complete) {
     cnt++;
   }
   GPIOA->ODR &= (uint32_t) ~(1 << 4);
@@ -104,7 +104,7 @@ int main(void) {
   GPIOA->MODER &= ~(3U << 2 * 4);
   GPIOA->MODER |= (1U << 2 * 4);
   GPIOA->ODR &= (uint32_t) ~(1 << 4);
-  
+
   test();
   while (1) {
   }

@@ -1,5 +1,7 @@
 TARGET = uart-tx-int
-SRCS = uart-tx-int.c
+SRCS = main.c
+SRCS += calibration.c
+SRCS += uart_int.c
 
 LINKER_SCRIPT = ../flash/STM32F407VGTX_FLASH.ld
 
