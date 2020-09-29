@@ -15,8 +15,9 @@ void TIM2_IRQHandler(void) {
       TIM2->SR &= (uint32_t) ~(1U << 0);
     }
   }
-
+  TIM2->CR1 &= (~((uint16_t)1));
   uart1_transfer_complete = true;
+  NVIC_DisableIRQ(TIM2_IRQn);
 }
 
 void configure_timer(uint32_t baudrate) {
