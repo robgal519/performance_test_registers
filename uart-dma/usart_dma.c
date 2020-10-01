@@ -7,14 +7,16 @@
 #include "stdbool.h"
 #include "stm32f4xx.h"
 
-volatile bool usart1_transfer_complete = false;
+
+
+extern volatile bool UART_TransferComplete;
 
 void DMA2_Stream7_IRQHandler(void) {
   // clear stream transfer complete interrupt
   if (DMA2->HISR & DMA_HISR_TCIF7) {
     // clear interrupt
     DMA2->HIFCR |= DMA_HISR_TCIF7;
-    usart1_transfer_complete = true;
+    UART_TransferComplete = true;
   }
 }
 
@@ -99,7 +101,7 @@ void configure_usart1(uint32_t baudrate) {
 }
 
 void transfer_usart1_dma(uint8_t *data, uint32_t size) {
-  usart1_transfer_complete = false;
+  UART_TransferComplete = false;
   // source memory address
   DMA2_Stream7->M0AR = (uint32_t)data;
   // destination memory address
@@ -108,4 +110,13 @@ void transfer_usart1_dma(uint8_t *data, uint32_t size) {
   DMA2_Stream7->NDTR = size;
   // enable DMA
   DMA2_Stream7->CR |= DMA_SxCR_EN; // (1 << 0);
+}
+
+
+void Unintialize(void)
+{
+  USART1->CR1 &= ~USART_CR1_UE;
+  DMA2_Stream7->CR &= ~DMA_SxCR_EN;
+
+  NVIC_DisableIRQ(DMA2_Stream7_IRQn);
 }

@@ -10,5 +10,5 @@
 
 void configure_usart1(uint32_t baudrate);
 void transfer_usart1_dma(uint8_t *data, uint32_t size);
-
+void Unintialize(void);
 #endif // USART_DMA_H_

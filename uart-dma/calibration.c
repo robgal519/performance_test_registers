@@ -4,9 +4,10 @@
 
 #include "calibration.h"
 #include "stm32f4xx.h"
+#include "system_stm32f4xx.h"
 #include "stdbool.h"
 
-extern volatile bool usart1_transfer_complete;
+extern volatile bool UART_TransferComplete;
 
 void TIM2_IRQHandler(void) {
   // clear interrupt status
@@ -16,7 +17,7 @@ void TIM2_IRQHandler(void) {
     }
   }
   TIM2->CR1 &= (~((uint16_t)1));
-  usart1_transfer_complete = true;
+  UART_TransferComplete = true;
   NVIC_DisableIRQ(TIM2_IRQn);
 }
 
@@ -49,4 +50,10 @@ void start_calibration(uint8_t *data, uint32_t size) {
   (void)data;
   (void)size;
   TIM2->CR1 |= (1 << 0);
+}
+
+void diable_timer(void)
+{
+  TIM2->CR1 &= (~((uint16_t)1));
+  NVIC_DisableIRQ(TIM2_IRQn);
 }

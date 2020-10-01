@@ -13,7 +13,7 @@ static uint8_t *data;
 static uint32_t data_size;
 volatile uint32_t next_byte_pos;
 
-volatile bool uart1_transfer_complete = false;
+extern volatile bool UART_TransferComplete;
 
 static uint16_t get_bbr_for_speed(uint32_t speed, uint32_t fck) {
   // baud rate = fCK / (8 * (2 - OVER8) * USARTDIV)
@@ -32,7 +32,7 @@ void USART1_IRQHandler(void) {
   if (USART1->SR & USART_SR_TXE_Msk) {
 
     if (next_byte_pos == data_size) {
-      uart1_transfer_complete = true;
+      UART_TransferComplete = true;
       USART1->CR1 &= ~USART_CR1_TXEIE;
     } else {
       // flush ot the next char in the buffer
@@ -92,6 +92,13 @@ void start_transfer_usart1(uint8_t *buffer, uint32_t size) {
   data = buffer;
   data_size = size;
   next_byte_pos = 0;
-  uart1_transfer_complete = false;
+  UART_TransferComplete = false;
   USART1->CR1 |= USART_CR1_TXEIE;
+}
+
+void Unintialize(void)
+{
+  USART1->CR1 &= ~USART_CR1_UE;
+
+  NVIC_DisableIRQ(USART1_IRQn);
 }

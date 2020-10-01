@@ -19,9 +19,10 @@ int main(void);
 struct test_ctx {
   void (*configure)(uint32_t baudrate);
   void (*transfer)(uint8_t *data, uint32_t size);
+  void (*deinit)(void);
 };
 
-extern volatile bool usart1_transfer_complete;
+volatile bool UART_TransferComplete = false;
 
 uint32_t common_speeds[] = {
     4800,   9600,   19200,   38400,   57600,   115200,   230400,
@@ -41,10 +42,14 @@ void randomize_payload(uint8_t *data, uint32_t size) {
 }
 
 struct test_ctx calibration = {.configure = configure_timer,
-                               .transfer = start_calibration};
+                               .transfer = start_calibration,
+                               .deinit = diable_timer,
+                               };
 
 struct test_ctx testing_dma = {.configure = configure_usart1,
-                               .transfer = transfer_usart1_dma};
+                               .transfer = transfer_usart1_dma,
+                               .deinit = Unintialize,
+                               };
 
 bool test_performance(struct test_ctx *ctx, uint32_t baud, uint32_t *counter) {
 
@@ -63,14 +68,19 @@ bool test_performance(struct test_ctx *ctx, uint32_t baud, uint32_t *counter) {
   if (ctx->transfer == NULL)
     return false;
 
-  usart1_transfer_complete = false;
+  UART_TransferComplete = false;
 
   ctx->transfer(data, sizeof(data));
   GPIOA->ODR |= 1 << 4;
-  while (!usart1_transfer_complete) {
+  while (!UART_TransferComplete) {
     cnt++;
   }
   GPIOA->ODR &= (uint32_t) ~(1 << 4);
+
+  if (ctx->deinit == NULL)
+    return false;
+
+  ctx->deinit();
 
   *counter = cnt;
   return true;

@@ -10,5 +10,5 @@
 
 void configure_usart1(uint32_t baudrate);
 void start_transfer_usart1(uint8_t* buffer, uint32_t size);
-
+void Unintialize(void);
 #endif // UART_INT_H_

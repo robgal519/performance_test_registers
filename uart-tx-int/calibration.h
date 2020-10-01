@@ -9,5 +9,6 @@
 
 void configure_timer(uint32_t baudrate);
 void start_calibration(uint8_t *data, uint32_t size);
+void diable_timer(void);
 
 #endif // CALIBRATION_H_
