@@ -7,8 +7,9 @@
 #define USART_DMA_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
-void configure_usart1(uint32_t baudrate);
-void transfer_usart1_dma(uint8_t *data, uint32_t size);
-void Unintialize(void);
+void configure_usart1(void **internal,uint32_t baudrate);
+bool transfer_usart1_dma(void *internal, uint8_t *data, uint32_t size);
+bool Unintialize(void *internal);
 #endif // USART_DMA_H_

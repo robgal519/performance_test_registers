@@ -32,8 +32,9 @@ static uint16_t get_bbr_for_speed(uint32_t speed, uint32_t fck) {
   return BRR;
 }
 
-void configure_usart1(uint32_t baudrate) {
+void configure_usart1(void **internal, uint32_t baudrate) {
 
+  (void)internal;
   // enable USART1 clock
   RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
 
@@ -100,7 +101,8 @@ void configure_usart1(uint32_t baudrate) {
   NVIC_EnableIRQ(DMA2_Stream7_IRQn);
 }
 
-void transfer_usart1_dma(uint8_t *data, uint32_t size) {
+bool transfer_usart1_dma(void *internal, uint8_t *data, uint32_t size) {
+  (void)internal;
   UART_TransferComplete = false;
   // source memory address
   DMA2_Stream7->M0AR = (uint32_t)data;
@@ -110,13 +112,16 @@ void transfer_usart1_dma(uint8_t *data, uint32_t size) {
   DMA2_Stream7->NDTR = size;
   // enable DMA
   DMA2_Stream7->CR |= DMA_SxCR_EN; // (1 << 0);
+  return true;
 }
 
 
-void Unintialize(void)
+bool Unintialize(void *internal)
 {
+  (void)internal;
   USART1->CR1 &= ~USART_CR1_UE;
   DMA2_Stream7->CR &= ~DMA_SxCR_EN;
 
   NVIC_DisableIRQ(DMA2_Stream7_IRQn);
+  return true;
 }

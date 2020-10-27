@@ -41,8 +41,8 @@ void USART1_IRQHandler(void) {
   }
 }
 
-void configure_usart1(uint32_t baudrate) {
-
+void configure_usart1(void **internal, uint32_t baudrate) {
+(void)internal;
   // enable USART2 clock, bit 17 on APB1ENR
   RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
 
@@ -88,7 +88,8 @@ void configure_usart1(uint32_t baudrate) {
  * been send
  * @param size amount of data to send.
  */
-void start_transfer_usart1(uint8_t *buffer, uint32_t size) {
+void start_transfer_usart1(void *internal, uint8_t *data, uint16_t size) {
+  (void)internal;
   data = buffer;
   data_size = size;
   next_byte_pos = 0;
@@ -96,8 +97,9 @@ void start_transfer_usart1(uint8_t *buffer, uint32_t size) {
   USART1->CR1 |= USART_CR1_TXEIE;
 }
 
-void Unintialize(void)
+void Unintialize(void *internal)
 {
+  (void)internal;
   USART1->CR1 &= ~USART_CR1_UE;
 
   NVIC_DisableIRQ(USART1_IRQn);

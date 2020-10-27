@@ -17,9 +17,11 @@
 int main(void);
 
 struct test_ctx {
-  void (*configure)(uint32_t baudrate);
-  void (*transfer)(uint8_t *data, uint32_t size);
-  void (*deinit)(void);
+  void * internal;
+  void (*configure)(void **internal, uint32_t baudrate);
+  bool (*transfer)(void *internal, uint8_t *data,
+                                uint16_t size);
+  bool (*deinit)(void *internal);
 };
 
 volatile bool UART_TransferComplete = false;
@@ -41,10 +43,11 @@ void randomize_payload(uint8_t *data, uint32_t size) {
   }
 }
 
-struct test_ctx calibration = {.configure = configure_timer,
-                               .transfer = start_calibration,
-                               .deinit = diable_timer,
-                               };
+struct test_ctx calibration = {
+    .configure = setup_timer,
+    .transfer = start_timer,
+    .deinit = deinit_timer,
+};
 
 struct test_ctx testing_dma = {.configure = configure_usart1,
                                .transfer = transfer_usart1_dma,
@@ -52,26 +55,22 @@ struct test_ctx testing_dma = {.configure = configure_usart1,
                                };
 
 bool test_performance(struct test_ctx *ctx, uint32_t baud, uint32_t *counter) {
-
   static uint8_t data[500];
   uint32_t cnt = 0;
 
   if (ctx == NULL)
     return false;
-
   if (ctx->configure == NULL)
     return false;
-  ctx->configure(baud);
 
-  randomize_payload(data, sizeof(data));
-
-  if (ctx->transfer == NULL)
-    return false;
+  ctx->configure(&ctx->internal, baud);
 
   UART_TransferComplete = false;
+  randomize_payload(data, sizeof(data));
+  if (ctx->transfer(ctx->internal, data, sizeof(data)) == false)
+    return false;
 
-  ctx->transfer(data, sizeof(data));
-  GPIOA->ODR |= 1 << 4;
+  GPIOA->ODR &= (uint32_t) ~(1 << 4);
   while (!UART_TransferComplete) {
     cnt++;
   }
@@ -79,8 +78,7 @@ bool test_performance(struct test_ctx *ctx, uint32_t baud, uint32_t *counter) {
 
   if (ctx->deinit == NULL)
     return false;
-
-  ctx->deinit();
+  ctx->deinit(ctx->internal);
 
   *counter = cnt;
   return true;

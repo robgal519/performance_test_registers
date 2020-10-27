@@ -2,12 +2,10 @@
 // Author: Robert Gałat
 // Email: robgal519@gmail.com
 
-#ifndef CALIBRATION_H_
-#define CALIBRATION_H_
+#include "stdint.h"
+#include "stm32f4xx.h"
+#include <stdbool.h>
 
-#include <stdint.h>
-
-void configure_timer(uint32_t baudrate);
-void start_calibration(uint8_t *data, uint32_t size);
-void diable_timer(void);
-#endif // CALIBRATION_H_
+void setup_timer(void **internal, uint32_t baudrate);
+bool start_timer(void *internal, uint8_t *data, uint16_t size);
+bool deinit_timer(void *internal);
