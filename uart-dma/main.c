@@ -80,6 +80,9 @@ bool test_performance(struct test_ctx *ctx, uint32_t baud, uint32_t *counter) {
     return false;
   ctx->deinit(ctx->internal);
 
+  if (counter == NULL)
+    return false;
+  
   *counter = cnt;
   return true;
 }
